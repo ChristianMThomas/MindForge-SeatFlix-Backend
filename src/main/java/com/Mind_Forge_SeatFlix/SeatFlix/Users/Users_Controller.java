@@ -8,16 +8,20 @@ import java.util.List;
 import org.springframework.web.bind.annotation.GetMapping;
 
 
-// Contoller used for Handling Request 
+            // Contoller used for Handling Request 
 
     @RestController
     @RequestMapping (path = "api/v1/users")
+
+            // path to api ^
+
 public class Users_Controller {
 
 
 		private final Users_Service userService;
         
                 // constructor 
+
         public Users_Controller(Users_Service userService){
         this.userService = userService;
         }
