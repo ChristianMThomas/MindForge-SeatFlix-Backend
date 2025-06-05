@@ -14,16 +14,18 @@ import org.springframework.web.bind.annotation.GetMapping;
     @RequestMapping (path = "api/v1/users")
 public class Users_Controller {
 
-   	@GetMapping
-	public List <Users> hello(){
-		return List.of(
-			new Users(
-				1L,
-				"CThomas_876",
-				"Password",
-				"CThomas123@gmail.com"
-			)
-		);
+
+		private final Users_Service userService;
+        
+                // constructor 
+        public Users_Controller(Users_Service userService){
+        this.userService = userService;
+        }
+
+        @GetMapping
+    	public List <Users> getUsers(){
+        return Users_Service.getUsers();
+
 	}
     
 
