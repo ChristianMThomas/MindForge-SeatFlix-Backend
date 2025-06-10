@@ -37,8 +37,8 @@ public class Users_Controller {
                  user_Service.addNewUsers(users);
        
     }
-        @DeleteMapping(path = "{id}")
-        public void deleteUser(@PathVariable("id") Long id) {
+        @DeleteMapping(path = "{id}")                                   //DELETE MAPPING that handles DELETE Request 
+        public void deleteUser(@PathVariable("id") Long id) {           //Method that deletes user by searching by id
         user_Service.deleteUser(id);
     }
 
@@ -51,19 +51,16 @@ public class Users_Controller {
         user_Service.updateService(id, name, email);
     }
 
-   @PostMapping("/login")
-public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-    Users user = ((Users_Repository) user_Service).findUserByUsername(loginRequest.getUsername())
-            .orElseThrow(() -> new RuntimeException("User not found"));
+        @PostMapping("/login")                                                                            //POST MAPPING that handles request login autherization by checking if users credintals match DB
+        public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {                       
+            Users user = user_Service.findUserByUsername(loginRequest.getUsername());                     // Checks if login request username  matches any username from DB
 
-    BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-    if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-        return ResponseEntity.ok("Login successful!");
-    } else {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-    }
-}
-
-
-
+            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
+            if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {                // Checks if login request password matches found username password 
+                 return ResponseEntity.ok("Login successful!");                                     
+            }
+            else {
+                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+            }
+        }
 }

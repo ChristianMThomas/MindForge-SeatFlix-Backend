@@ -4,7 +4,7 @@ public class LoginRequest {
     private String username;
     private String password;
 
-    // Constructors
+                                                                                // Constructors
     public LoginRequest() {}
 
     public LoginRequest(String username, String password) {
@@ -12,11 +12,11 @@ public class LoginRequest {
         this.password = password;
     }
 
-    // Getters
+                                                                                 // Getters
     public String getUsername() { return username; }
     public String getPassword() { return password; }
 
-    // Setters
+                                                                                // Setters
     public void setUsername(String username) { this.username = username; }
     public void setPassword(String password) { this.password = password; }
 }

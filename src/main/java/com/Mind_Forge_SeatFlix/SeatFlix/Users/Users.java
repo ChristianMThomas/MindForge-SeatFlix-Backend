@@ -32,13 +32,14 @@ public class Users implements UserDetails
     private static int numOfUsers = 0;                                                                                     // Static int to track the number of Users our platform has
 
     @Version
-    private Integer version;                                                                                               // make sure your entity has a @Version field for optimistic locking.
+    private Integer version;                                                                                               // Make sure entity has a @Version field for optimistic locking.
 
     public Users() {
         numOfUsers++;
-    }                                                                                                                      // No args Constructor
+    }                                                                                                                      // No args Constructor increases numOfUsers Each time an account is created
+                                                                                                                           // Required by Spring JPA/Hibernate 
 
-    public Users(Long id, String username, String password, String email) {
+    public Users(Long id, String username, String password, String email) {                                                // Constructor including id field
         this.id = id;
         this.username = username;
         this.password = password;
@@ -46,7 +47,7 @@ public class Users implements UserDetails
         numOfUsers++;
     }
 
-    public Users(String username, String password, String email) {
+    public Users(String username, String password, String email) {                                                          // Constructor excluding id field. Useful for creating new users DB auto generates ID
         this.username = username;
         this.password = password;
         this.email = email;
@@ -68,9 +69,11 @@ public class Users implements UserDetails
 
     public void setEmail(String email) {this.email = email;}
 
+
+                                                                                                                        // fields required by User Details Interface for Authentification
      @Override
    public Collection<? extends GrantedAuthority> getAuthorities() {
-        return Collections.emptyList(); // No roles for now
+        return Collections.emptyList();                                                                                 // No roles for now  Ex: [ADMIN  USER  BANNED]
     }
     @Override
     public String getPassword() {
@@ -81,7 +84,7 @@ public class Users implements UserDetails
     public String getUsername() {
         return username;
     }
-
+                                                                                                                        // Account configuration status
     @Override
     public boolean isAccountNonExpired() { return true; }
 

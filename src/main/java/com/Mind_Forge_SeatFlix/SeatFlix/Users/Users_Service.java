@@ -8,7 +8,7 @@ import org.springframework.stereotype.Service;
 
 import jakarta.transaction.Transactional;
 
-                                                                                            // Service that acts between controller and Repository that handles Buisness Logic
+                                                                                            // Service that acts between Controller and Repository that handles Buisness Logic
 @Service
 public class Users_Service {
 
@@ -37,11 +37,11 @@ public class Users_Service {
         if (usersOptional.isPresent()) {
             throw new IllegalStateException("Email has been taken");
         }
-        users.setPassword(passwordEncoder.encode(users.getPassword()));                                            // Hash password before saving
+        users.setPassword(passwordEncoder.encode(users.getPassword()));                     // Hash password before saving
         users_Repository.save(users);
     }
-                                                                                         // Method to deleting Users from DB  
-                                                                                         /* First checks if there is a user with the id that exist
+                                                                                            // Method to deleting Users from DB  
+                                                                                            /* First checks if there is a user with the id that exist
                                                                                                     If (user with id does not exist ) then
                                                                                                     Throws IllegalStateException with Message
                                                                                                 else 
@@ -77,5 +77,13 @@ public class Users_Service {
     public void updateService(Long id, String name, String email) {
         // TODO Auto-generated method stub
         throw new UnsupportedOperationException("Unimplemented method 'updateService'");
-    }  
+    } 
+    
+    
+    public Users findUserByUsername(String username) {
+        return users_Repository.findUserByUsername(username)
+            .orElseThrow(() -> new RuntimeException("User not found"));
+    }
+
+
 } 
