@@ -2,10 +2,8 @@ package com.Mind_Forge_SeatFlix.SeatFlix.Users;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-
 import jakarta.transaction.Transactional;
 
                                                                                             // Service that acts between Controller and Repository that handles Buisness Logic
@@ -13,11 +11,11 @@ import jakarta.transaction.Transactional;
 public class Users_Service {
 
     private final Users_Repository users_Repository; 
-    private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-                                       // Instance of Repository for usage
-
-    public Users_Service(Users_Repository users_Repository){                                // Constructor that has Repo param
+    private final BCryptPasswordEncoder passwordEncoder;
+                                                                                          // Instance of Repository for usage
+    public Users_Service(Users_Repository users_Repository, BCryptPasswordEncoder passwordEncoder){                                // Constructor that has Repo param
         this.users_Repository = users_Repository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     public List <Users> getUsers(){                                                         // Method used to call FindAll() from Repo to fetch user records from DB
@@ -37,8 +35,9 @@ public class Users_Service {
         if (usersOptional.isPresent()) {
             throw new IllegalStateException("Email has been taken");
         }
-        users.setPassword(passwordEncoder.encode(users.getPassword()));                     // Hash password before saving
-        users_Repository.save(users);
+         String hashedPassword = passwordEncoder.encode(users.getPassword());
+         users.setPassword(hashedPassword);                                                  // Hash password before saving
+         users_Repository.save(users);
     }
                                                                                             // Method to deleting Users from DB  
                                                                                             /* First checks if there is a user with the id that exist

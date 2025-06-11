@@ -22,14 +22,21 @@ public class Users_Config {
     private UserDetailsServiceImpl userDetailsService;
 
     @Bean
+    BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // Shared instance for the whole app
+    }
+
+    @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/users/register", "/api/v1/users/login").permitAll() // Allow
-                                                                                                      // login/register
-                        .anyRequest().authenticated())
-                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .csrf(csrf -> csrf.disable()); // Disable CSRF for API requests
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/api/v1/users/register", "/api/v1/users/login").permitAll() // Allow login & register
+                .anyRequest().authenticated()
+            )
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .csrf(csrf -> csrf.disable()); // Disable CSRF for API calls
+
+
 
         return http.build();
     }

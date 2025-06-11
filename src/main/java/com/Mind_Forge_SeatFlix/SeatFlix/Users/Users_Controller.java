@@ -4,6 +4,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -20,10 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody;
 @RequestMapping(path = "api/v1/users")                                  // path to api
 
 public class Users_Controller {
-        private final Users_Service user_Service;                        // created an instance of Users_Service
-         
-        public Users_Controller(Users_Service user_Service) {            // constructor
+        private final Users_Service user_Service;
+        private final BCryptPasswordEncoder passwordEncoder;
+                                                                        // created an instance of Users_Service
+        
+        public Users_Controller(Users_Service user_Service, BCryptPasswordEncoder passwordEncoder ) {            // constructor
                 this.user_Service = user_Service; 
+                this.passwordEncoder = passwordEncoder;
         }
 
         @GetMapping                                                     // GET MAPPING that handles GET Request to the api path
@@ -32,7 +36,7 @@ public class Users_Controller {
 
         }
 
-       @PostMapping                                                     //POST MAPPING that handles POST Request to the api path
+       @PostMapping("/register")                                                     //POST MAPPING that handles POST Request to the api path
         public void Register(@RequestBody Users users) {                //Method takes userinput in the form of an object and uses UserService method to add new user
                  user_Service.addNewUsers(users);
        
@@ -51,16 +55,17 @@ public class Users_Controller {
         user_Service.updateService(id, name, email);
     }
 
-        @PostMapping("/login")                                                                            //POST MAPPING that handles request login autherization by checking if users credintals match DB
-        public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {                       
-            Users user = user_Service.findUserByUsername(loginRequest.getUsername());                     // Checks if login request username  matches any username from DB
+       @PostMapping("/login")
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
+    Users user = user_Service.findUserByUsername(loginRequest.getUsername());
+    boolean passwordMatches = passwordEncoder.matches(loginRequest.getPassword(), user.getPassword());
+    if (passwordMatches) {
+        return ResponseEntity.ok("Login successful!");
+    } else {
+        System.out.println("Login failed: Incorrect password.");
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+    }
+}
 
-            BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
-            if (passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {                // Checks if login request password matches found username password 
-                 return ResponseEntity.ok("Login successful!");                                     
-            }
-            else {
-                return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
-            }
-        }
+
 }

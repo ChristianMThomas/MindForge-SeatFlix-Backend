@@ -6,6 +6,8 @@ import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -23,17 +25,19 @@ public class Users implements UserDetails
  {
     @Id
     @SequenceGenerator(name = "Users_Sequence", sequenceName = "Users_Sequence", allocationSize = 1)
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "Users_Sequence")
+   @GeneratedValue(strategy = GenerationType.IDENTITY) // Auto-incremented ID
 
     private Long id;
+    
     private String username;
     private String password;
     private String email;
     private static int numOfUsers = 0;                                                                                     // Static int to track the number of Users our platform has
 
-    @Version
-    private Integer version;                                                                                               // Make sure entity has a @Version field for optimistic locking.
 
+    @Column(nullable = true) // Allow NULL values
+    private Long version;
+    
     public Users() {
         numOfUsers++;
     }                                                                                                                      // No args Constructor increases numOfUsers Each time an account is created
@@ -65,7 +69,7 @@ public class Users implements UserDetails
 
     public void setUsername(String username) {this.username = username;}
 
-    public void setPassword(String rawPassword) {this.password = new BCryptPasswordEncoder().encode(rawPassword); }
+    public void setPassword(String password) {this.password = password; }
 
     public void setEmail(String email) {this.email = email;}
 
