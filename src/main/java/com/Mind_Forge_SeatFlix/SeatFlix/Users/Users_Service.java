@@ -84,5 +84,9 @@ public class Users_Service {
             .orElseThrow(() -> new RuntimeException("User not found"));
     }
 
+    public Users getUserById(Long id) {
+        return users_Repository.findById(id).orElse(null);
+}
+
 
 } 
