@@ -121,6 +121,7 @@ public class Users_Controller {
 
         try {
             Long userId = userDetails.getId();
+            System.out.println("User uploading: " + userDetails);
 
             // Save avatar and update user
             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
