@@ -119,9 +119,13 @@ public class Users_Controller {
     public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file,
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
+        if (userDetails == null) {
+            System.out.println("UserDetails is null — session may not be attached.");
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
         try {
             Long userId = userDetails.getId();
-            System.out.println("User uploading: " + userDetails);
 
             // Save avatar and update user
             String fileName = StringUtils.cleanPath(file.getOriginalFilename());
