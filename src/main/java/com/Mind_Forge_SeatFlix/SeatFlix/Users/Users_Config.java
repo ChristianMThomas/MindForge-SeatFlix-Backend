@@ -64,6 +64,7 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
+            .requestMatchers("/uploads/**").permitAll() 
             .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
             .anyRequest().authenticated()
         );
