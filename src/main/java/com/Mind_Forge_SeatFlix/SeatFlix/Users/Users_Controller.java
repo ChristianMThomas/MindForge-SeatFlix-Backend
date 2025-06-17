@@ -80,43 +80,40 @@ public class Users_Controller {
     }
 
     @PostMapping("/login")
-public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
-    Users user = user_Service.findUserByUsername(loginRequest.getUsername());
+    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+        Users user = user_Service.findUserByUsername(loginRequest.getUsername());
 
-    if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
+        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
 
-        // Wrap user in Spring Security-compatible class
-        CustomUserDetails userDetails = new CustomUserDetails(user);
+            // Wrap user in Spring Security-compatible class
+            CustomUserDetails userDetails = new CustomUserDetails(user);
 
-        // Create the Authentication token
-        UsernamePasswordAuthenticationToken authenticationToken =
-            new UsernamePasswordAuthenticationToken(
-                userDetails,
-                null,
-                userDetails.getAuthorities()
-            );
+            // Create the Authentication token
+            UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(
+                    userDetails,
+                    null,
+                    userDetails.getAuthorities());
 
-        // Set authentication in Spring Security context
-        SecurityContext securityContext = SecurityContextHolder.getContext();
-        securityContext.setAuthentication(authenticationToken);
+            // Set authentication in Spring Security context
+            SecurityContext securityContext = SecurityContextHolder.getContext();
+            securityContext.setAuthentication(authenticationToken);
 
-        // Persist the security context in session
-        request.getSession(true).setAttribute(
-            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
-            securityContext
-        );
+            // Persist the security context in session
+            request.getSession(true).setAttribute(
+                    HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+                    securityContext);
 
-        // Build and return response
-        Map<String, Object> response = new HashMap<>();
-        response.put("message", "Login successful!");
-        response.put("userId", user.getId());
+            // Build and return response
+            Map<String, Object> response = new HashMap<>();
+            response.put("message", "Login successful!");
+            response.put("userId", user.getId());
 
-        return ResponseEntity.ok(response);
+            return ResponseEntity.ok(response);
 
-    } else {
-        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        } else {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        }
     }
-}
 
     @PostMapping("/upload-avatar")
     public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file,
