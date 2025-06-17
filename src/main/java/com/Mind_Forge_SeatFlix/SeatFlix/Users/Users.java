@@ -1,5 +1,6 @@
 package com.Mind_Forge_SeatFlix.SeatFlix.Users;
 
+import java.time.LocalDate;
 import java.util.Collection;
 import java.util.Collections;
 import org.springframework.security.core.GrantedAuthority;
@@ -34,6 +35,12 @@ public class Users implements UserDetails
 
     @Column(nullable = true) // Allow NULL values
     private Long version;
+
+    @Column(name = "profile_pic")
+    private String profilePic;
+
+    @Column(name = "date_joined")
+    private LocalDate dateJoined;
     
     public Users() {
         numOfUsers++;
@@ -62,6 +69,12 @@ public class Users implements UserDetails
 
     public static int getNumOfUsers() {return numOfUsers;}
 
+    public String getProfilePic() {return profilePic;}
+
+    public LocalDate getDateJoined() {return dateJoined;}
+
+
+
     public void setId(Long id) {this.id = id;}
 
     public void setUsername(String username) {this.username = username;}
@@ -69,6 +82,18 @@ public class Users implements UserDetails
     public void setPassword(String password) {this.password = password; }
 
     public void setEmail(String email) {this.email = email;}
+
+    public void setProfilePic(String profilePic) {this.profilePic = profilePic;}
+
+    public void setDateJoined(LocalDate dateJoined) {this.dateJoined = dateJoined;}
+
+
+
+    public static int getTotalUsers() {
+        return numOfUsers;
+    }
+
+
 
 
                                                                                                                         // fields required by User Details Interface for Authentification

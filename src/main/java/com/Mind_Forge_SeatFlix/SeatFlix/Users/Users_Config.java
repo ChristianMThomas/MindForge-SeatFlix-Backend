@@ -5,6 +5,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -31,6 +32,8 @@ public class Users_Config {
         return new BCryptPasswordEncoder(); // Shared instance for the whole app
     }
 
+
+
     @Bean
     public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
@@ -45,11 +48,11 @@ public CorsConfigurationSource corsConfigurationSource() {
     CorsConfiguration configuration = new CorsConfiguration();
     configuration.setAllowedOrigins(List.of("http://localhost:5173"));
     configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-    configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+   configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
     configuration.setAllowCredentials(true);
 
     UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-    source.registerCorsConfiguration("/api/v1/users/**", configuration);
+    source.registerCorsConfiguration("/**", configuration);
     return source;
 }
 
@@ -61,9 +64,10 @@ public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Excepti
         .authorizeHttpRequests(auth -> auth
             .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
             .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
             .anyRequest().authenticated()
         );
     return http.build();
-}
 
+}
 }

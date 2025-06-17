@@ -1,4 +1,5 @@
 package com.Mind_Forge_SeatFlix.SeatFlix.Users;
+import java.time.LocalDate;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
@@ -37,6 +38,16 @@ public class Users_Service {
         }
          String hashedPassword = passwordEncoder.encode(users.getPassword());
          users.setPassword(hashedPassword);                                                  // Hash password before saving
+         if (users.getDateJoined() == null) {
+        users.setDateJoined(LocalDate.now());
+    }
+
+                                                                                            // Set default profile picture if not provided
+    if (users.getProfilePic() == null || users.getProfilePic().isEmpty()) {
+        users.setProfilePic("user.png");
+    }
+
+
          users_Repository.save(users);
     }
                                                                                             // Method to deleting Users from DB  
@@ -87,6 +98,16 @@ public class Users_Service {
     public Users getUserById(Long id) {
         return users_Repository.findById(id).orElse(null);
 }
+
+public Users updateProfilePic(Long userId, String fileUrl) {
+    Users user = users_Repository.findById(userId)
+        .orElseThrow(() -> new IllegalStateException("User not found"));
+
+    user.setProfilePic(fileUrl);
+    return users_Repository.save(user);
+}
+
+
 
 
 } 

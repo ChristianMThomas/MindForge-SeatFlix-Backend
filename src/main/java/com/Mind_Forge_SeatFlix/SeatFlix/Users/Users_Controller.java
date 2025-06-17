@@ -3,13 +3,29 @@ package com.Mind_Forge_SeatFlix.SeatFlix.Users;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.Mind_Forge_SeatFlix.SeatFlix.config.CustomUserDetails;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.StandardCopyOption;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.annotation.CrossOrigin;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -64,17 +80,66 @@ public class Users_Controller {
     }
 
     @PostMapping("/login")
-    public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest) {
-        Users user = user_Service.findUserByUsername(loginRequest.getUsername());
+public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest, HttpServletRequest request) {
+    Users user = user_Service.findUserByUsername(loginRequest.getUsername());
 
-        if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-            Map<String, Object> response = new HashMap<>();
-            response.put("message", "Login successful!");
-            response.put("userId", user.getId());
+    if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
 
-            return ResponseEntity.ok(response);
-        } else {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+        // Wrap user in Spring Security-compatible class
+        CustomUserDetails userDetails = new CustomUserDetails(user);
+
+        // Create the Authentication token
+        UsernamePasswordAuthenticationToken authenticationToken =
+            new UsernamePasswordAuthenticationToken(
+                userDetails,
+                null,
+                userDetails.getAuthorities()
+            );
+
+        // Set authentication in Spring Security context
+        SecurityContext securityContext = SecurityContextHolder.getContext();
+        securityContext.setAuthentication(authenticationToken);
+
+        // Persist the security context in session
+        request.getSession(true).setAttribute(
+            HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
+            securityContext
+        );
+
+        // Build and return response
+        Map<String, Object> response = new HashMap<>();
+        response.put("message", "Login successful!");
+        response.put("userId", user.getId());
+
+        return ResponseEntity.ok(response);
+
+    } else {
+        return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
+    }
+}
+
+    @PostMapping("/upload-avatar")
+    public ResponseEntity<?> uploadAvatar(@RequestParam("file") MultipartFile file,
+            @AuthenticationPrincipal CustomUserDetails userDetails) {
+
+        try {
+            Long userId = userDetails.getId();
+
+            // Save avatar and update user
+            String fileName = StringUtils.cleanPath(file.getOriginalFilename());
+            Path uploadDir = Paths.get("uploads/avatars/" + userId);
+            Files.createDirectories(uploadDir);
+
+            Path filePath = uploadDir.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            String fileUrl = "/uploads/avatars/" + userId + "/" + fileName;
+            Users user = user_Service.updateProfilePic(userId, fileUrl);
+
+            return ResponseEntity.ok(user); // send back updated profile
+        } catch (IOException e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Failed to upload avatar");
         }
     }
 
