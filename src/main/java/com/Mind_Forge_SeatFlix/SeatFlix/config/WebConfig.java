@@ -1,6 +1,5 @@
 package com.Mind_Forge_SeatFlix.SeatFlix.config;
 
-
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
@@ -12,15 +11,17 @@ public class WebConfig implements WebMvcConfigurer {
     @Override
     public void addCorsMappings(CorsRegistry registry) {
         registry.addMapping("/**")
-                .allowedOrigins("http://localhost:5173")
+                .allowedOrigins("http://localhost:5173") // Update this if frontend is deployed
                 .allowedMethods("GET", "POST", "PUT", "DELETE", "OPTIONS")
                 .allowedHeaders("*")
                 .allowCredentials(true);
     }
-    
+
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        // Serve static files from the local "uploads" folder — path is relative to project root
         registry.addResourceHandler("/uploads/**")
-                .addResourceLocations("file:uploads/");
+                .addResourceLocations("file:uploads/") // no leading slash here
+                .setCachePeriod(3600); // optional: set browser cache time in seconds
     }
 }
