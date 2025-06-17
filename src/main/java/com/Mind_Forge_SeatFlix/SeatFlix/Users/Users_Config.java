@@ -14,6 +14,12 @@ import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.boot.web.servlet.server.Session;
+import org.springframework.session.web.http.CookieSerializer;
+import org.springframework.session.web.http.DefaultCookieSerializer;
+import org.springframework.context.annotation.Bean;
+
+import org.springframework.*;
 
 import java.util.List;
 
@@ -74,4 +80,13 @@ public class Users_Config {
 
         return http.build();
     }
+
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setSameSite("None"); // Allow cross-site cookies
+        serializer.setUseSecureCookie(true); // Required for 'SameSite=None' on HTTPS
+        return serializer;
+    }
+
 }
