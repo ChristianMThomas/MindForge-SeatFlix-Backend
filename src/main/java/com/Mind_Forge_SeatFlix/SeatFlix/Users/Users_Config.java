@@ -50,7 +50,7 @@ public class Users_Config {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         configuration.setAllowCredentials(true);
@@ -85,7 +85,7 @@ public class Users_Config {
 public CookieSerializer cookieSerializer() {
     DefaultCookieSerializer serializer = new DefaultCookieSerializer();
     serializer.setSameSite("None");
-    serializer.setUseSecureCookie(false); // 🔓 allow on HTTP for localhost testing
+    serializer.setUseSecureCookie(true); // 🔓 allow on HTTP for localhost testing
     return serializer;
 }
 
