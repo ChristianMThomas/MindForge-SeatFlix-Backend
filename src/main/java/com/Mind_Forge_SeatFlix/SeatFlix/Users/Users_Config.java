@@ -19,8 +19,6 @@ import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.context.annotation.Bean;
 
-
-
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,10 +64,12 @@ public class Users_Config {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED) // Allow sessions when needed
+                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .maximumSessions(1).expiredUrl("/login") // Limit sessions per user to avoid conflicts
                 )
                 .securityContext(securityContext -> securityContext
-                        .requireExplicitSave(false) // Auto-persist SecurityContext into session
+                        .requireExplicitSave(true) // 🔥 Force explicit session save
+
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
@@ -81,14 +81,14 @@ public class Users_Config {
         return http.build();
     }
 
-@Bean
-public CookieSerializer cookieSerializer() {
-    DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-    serializer.setSameSite("None");                             // ✅ Required for cross-site session cookies
-    serializer.setUseSecureCookie(true);                        // ✅ Required for HTTPS
-    serializer.setCookiePath("/");                              // ✅ Makes cookie accessible to all endpoints
-    serializer.setDomainName("mind-forge-cthomas.com");         // ✅ Replace localhost with your real domain
-    return serializer;
-}
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setSameSite("None"); // ✅ Required for cross-site session cookies
+        serializer.setUseSecureCookie(true); // ✅ Required for HTTPS
+        serializer.setCookiePath("/"); // ✅ Makes cookie accessible to all endpoints
+        serializer.setDomainName("mind-forge-cthomas.com"); // ✅ Replace localhost with your real domain
+        return serializer;
+    }
 
 }
