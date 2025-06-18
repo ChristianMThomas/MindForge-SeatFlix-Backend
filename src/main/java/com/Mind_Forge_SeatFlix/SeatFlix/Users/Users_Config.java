@@ -69,7 +69,8 @@ public class Users_Config {
                         .maximumSessions(1).expiredUrl("/login") // Prevents session conflicts
                 )
                 .securityContext(securityContext -> securityContext
-                        .requireExplicitSave(true) // ✅ Ensures authentication is properly stored
+                        .requireExplicitSave(true) // ✅ Allows automatic session restoration
+
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
