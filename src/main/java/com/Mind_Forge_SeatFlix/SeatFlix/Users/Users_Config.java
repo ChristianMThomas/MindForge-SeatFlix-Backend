@@ -71,7 +71,6 @@ public class Users_Config {
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
                         .requestMatchers("/error").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/whoami").authenticated()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
                         .anyRequest().authenticated())
