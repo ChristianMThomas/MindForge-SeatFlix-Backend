@@ -73,10 +73,7 @@ public class Users_Config {
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
-                        .anyRequest().authenticated())
-                .formLogin(form -> form
-                        .loginProcessingUrl("/api/v1/users/login") // <-- Process login here
-                        .permitAll() // <-- Allow public access to login endpoints
+                        .anyRequest().authenticated()
                 );
 
         return http.build();
