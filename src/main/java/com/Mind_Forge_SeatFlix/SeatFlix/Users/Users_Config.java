@@ -64,15 +64,16 @@ public class Users_Config {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
-                        .maximumSessions(1).expiredUrl("/login") // Limit sessions per user to avoid conflicts
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // 🔥 Ensures authentication persistence
+                        .maximumSessions(1).expiredUrl("/login") // Prevents session conflicts
                 )
                 .securityContext(securityContext -> securityContext
-                        .requireExplicitSave(true) // 🔥 Force explicit session save
-
+                        .requireExplicitSave(true) // ✅ Ensures session storage before processing requests
                 )
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/whoami").authenticated() // ✅ Now explicitly
+                                                                                                 // secured
                         .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
                         .requestMatchers("/uploads/**").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
