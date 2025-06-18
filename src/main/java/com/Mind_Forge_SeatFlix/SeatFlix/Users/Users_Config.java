@@ -81,12 +81,12 @@ public class Users_Config {
         return http.build();
     }
 
-    @Bean
-    public CookieSerializer cookieSerializer() {
-        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setSameSite("None"); // Allow cross-site cookies
-        serializer.setUseSecureCookie(true); // Required for 'SameSite=None' on HTTPS
-        return serializer;
-    }
+ @Bean
+public CookieSerializer cookieSerializer() {
+    DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+    serializer.setSameSite("None");
+    serializer.setUseSecureCookie(false); // 🔓 allow on HTTP for localhost testing
+    return serializer;
+}
 
 }
