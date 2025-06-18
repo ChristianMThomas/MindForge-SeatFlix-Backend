@@ -64,23 +64,15 @@ public class Users_Config {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS) // 🔥 Ensures session persistence across
-                                                                             // requests
-                        .maximumSessions(1).expiredUrl("/login") // Prevents session conflicts
-                )
-                .securityContext(securityContext -> securityContext
-                        .requireExplicitSave(true) // ✅ Allows automatic session restoration
-
-                )
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .maximumSessions(1).expiredUrl("/login"))
+                .securityContext(sec -> sec.requireExplicitSave(true))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/whoami").authenticated() // 🔥 Ensures only
-                                                                                                 // logged-in users can
-                                                                                                 // access `/whoami`
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated() // 🔥 Requires
-                                                                                             // authentication for user
-                                                                                             // details
+                        .requestMatchers("/error").permitAll() // 🚨 Add this
                         .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/whoami").authenticated()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
                         .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
                         .anyRequest().authenticated());
 
