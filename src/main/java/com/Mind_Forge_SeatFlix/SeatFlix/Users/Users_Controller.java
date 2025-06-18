@@ -145,4 +145,9 @@ public class Users_Controller {
         }
     }
 
+    @GetMapping("/whoami")
+    public ResponseEntity<?> whoAmI(@AuthenticationPrincipal CustomUserDetails userDetails) {
+        return ResponseEntity.ok(userDetails != null ? userDetails.getUsername() : "Anonymous");
+    }
+
 }
