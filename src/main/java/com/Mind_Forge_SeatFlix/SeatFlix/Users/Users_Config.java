@@ -81,11 +81,13 @@ public class Users_Config {
         return http.build();
     }
 
- @Bean
+@Bean
 public CookieSerializer cookieSerializer() {
     DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-    serializer.setSameSite("None");
-    serializer.setUseSecureCookie(true); // 🔓 allow on HTTP for localhost testing
+    serializer.setSameSite("None");                             // ✅ Required for cross-site session cookies
+    serializer.setUseSecureCookie(true);                        // ✅ Required for HTTPS
+    serializer.setCookiePath("/");                              // ✅ Makes cookie accessible to all endpoints
+    serializer.setDomainName("mind-forge-cthomas.com");         // ✅ Replace localhost with your real domain
     return serializer;
 }
 
