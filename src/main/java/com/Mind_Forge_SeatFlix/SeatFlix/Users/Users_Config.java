@@ -64,7 +64,7 @@ public class Users_Config {
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .csrf(csrf -> csrf.disable())
                 .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
                         .maximumSessions(1).expiredUrl("/login") // Limit sessions per user to avoid conflicts
                 )
                 .securityContext(securityContext -> securityContext
