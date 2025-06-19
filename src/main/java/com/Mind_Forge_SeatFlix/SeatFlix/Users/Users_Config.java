@@ -18,6 +18,9 @@ import org.springframework.boot.web.servlet.server.Session;
 import org.springframework.session.web.http.CookieSerializer;
 import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.web.multipart.support.MultipartFilter;
+import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import jakarta.servlet.ServletContext;
 
 import java.util.List;
 
@@ -49,8 +52,8 @@ public class Users_Config {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
@@ -58,35 +61,42 @@ public class Users_Config {
         return source;
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                .csrf(csrf -> csrf.disable())
-                .sessionManagement(session -> session
-                        .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                        .maximumSessions(1).expiredUrl("/login"))
-                .securityContext(sec -> sec.requireExplicitSave(true))
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
-                        .requestMatchers("/error").permitAll()
-                        .requestMatchers("/uploads/**").permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
-                        .anyRequest().authenticated()
-                );
+    public class SecurityApplicationInitializer
+            extends AbstractSecurityWebApplicationInitializer {
 
-        return http.build();
+        @Override
+        protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
+            insertFilters(servletContext, new MultipartFilter());
+        }
+
+        @Bean
+        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+            http
+                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                    .csrf(csrf -> csrf.disable())
+                    .sessionManagement(session -> session
+                            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
+                            .maximumSessions(1).expiredUrl("/login"))
+                    .securityContext(sec -> sec.requireExplicitSave(true))
+                    .authorizeHttpRequests(auth -> auth
+                            .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
+                            .requestMatchers("/error").permitAll()
+                            .requestMatchers("/uploads/**").permitAll()
+                            .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
+                            .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
+                            .anyRequest().authenticated());
+
+            return http.build();
+        }
+
+        @Bean
+        public CookieSerializer cookieSerializer() {
+            DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+            serializer.setSameSite("None"); // ✅ Required for cross-site session cookies
+            serializer.setUseSecureCookie(true); // ✅ Required for HTTPS
+            serializer.setCookiePath("/"); // ✅ Makes cookie accessible to all endpoints
+            serializer.setDomainName("mind-forge-cthomas.com"); // ✅ Replace localhost with your real domain
+            return serializer;
+        }
     }
-
-    @Bean
-    public CookieSerializer cookieSerializer() {
-        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-        serializer.setSameSite("None"); // ✅ Required for cross-site session cookies
-        serializer.setUseSecureCookie(true); // ✅ Required for HTTPS
-        serializer.setCookiePath("/"); // ✅ Makes cookie accessible to all endpoints
-        serializer.setDomainName("mind-forge-cthomas.com"); // ✅ Replace localhost with your real domain
-        return serializer;
-    }
-
 }
