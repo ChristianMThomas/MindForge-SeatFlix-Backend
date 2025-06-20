@@ -51,60 +51,53 @@ public class Users_Config {
                 .build();
     }
 
-    public class SecurityApplicationInitializer
-            extends AbstractSecurityWebApplicationInitializer {
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+                .csrf(csrf -> csrf.disable())
+                .sessionManagement(session -> session
+                        .sessionCreationPolicy(SessionCreationPolicy.ALWAYS)
+                        .maximumSessions(1).expiredUrl("/login"))
+                .securityContext(sec -> sec
+                        .requireExplicitSave(true)
+                        .securityContextRepository(securityContextRepository()))
+                .authorizeHttpRequests(auth -> auth
+                        .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
+                        .requestMatchers("/error").permitAll()
+                        .requestMatchers("/uploads/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
+                        .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
+                        .anyRequest().authenticated());
 
-        @Override
-        protected void beforeSpringSecurityFilterChain(ServletContext servletContext) {
-            insertFilters(servletContext, new MultipartFilter());
-        }
+        return http.build();
+    }
 
-        @Bean
-        public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-            http
-                    .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-                    .csrf(csrf -> csrf.disable())
-                    .sessionManagement(session -> session
-                            .sessionCreationPolicy(SessionCreationPolicy.IF_REQUIRED)
-                            .maximumSessions(1).expiredUrl("/login"))
-                    .securityContext(sec -> sec.requireExplicitSave(true))
-                    .authorizeHttpRequests(auth -> auth
-                            .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
-                            .requestMatchers("/error").permitAll()
-                            .requestMatchers("/uploads/**").permitAll()
-                            .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
-                            .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
-                            .anyRequest().authenticated());
+    @Bean
+    public SecurityContextRepository securityContextRepository() {
+        return new HttpSessionSecurityContextRepository();
+    }
 
-            return http.build();
-        }
+    @Bean
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
+        configuration.setAllowedMethods(List.of("*"));
+        configuration.setAllowedHeaders(List.of("*"));
+        configuration.setAllowCredentials(true);
 
-        @Bean
-        public SecurityContextRepository securityContextRepository() {
-            return new HttpSessionSecurityContextRepository(); // ✅ registers default Spring session store
-        }
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
-        @Bean
-        public CorsConfigurationSource corsConfigurationSource() {
-            CorsConfiguration configuration = new CorsConfiguration();
-            configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
-            configuration.setAllowedMethods(List.of("*"));
-            configuration.setAllowedHeaders(List.of("*"));
-            configuration.setAllowCredentials(true);
-
-            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-            source.registerCorsConfiguration("/**", configuration);
-            return source;
-        }
-
-        @Bean
-        public CookieSerializer cookieSerializer() {
-            DefaultCookieSerializer serializer = new DefaultCookieSerializer();
-            serializer.setSameSite("None"); // ✅ Required for cross-site session cookies
-            serializer.setUseSecureCookie(true); // ✅ Required for HTTPS
-            serializer.setCookiePath("/"); // ✅ Makes cookie accessible to all endpoints
-            serializer.setDomainName("mind-forge-cthomas.com"); // ✅ Replace localhost with your real domain
-            return serializer;
-        }
+    @Bean
+    public CookieSerializer cookieSerializer() {
+        DefaultCookieSerializer serializer = new DefaultCookieSerializer();
+        serializer.setSameSite("None");
+        serializer.setUseSecureCookie(true);
+        serializer.setCookiePath("/");
+        serializer.setDomainName("mind-forge-cthomas.com");
+        return serializer;
     }
 }
