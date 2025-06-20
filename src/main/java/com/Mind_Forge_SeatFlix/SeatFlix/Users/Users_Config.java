@@ -41,12 +41,11 @@ public class Users_Config {
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http,
-            CorsConfigurationSource corsSource) throws Exception {
+    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsSource)
+            throws Exception {
         http
                 .cors(cors -> cors.configurationSource(corsSource))
                 .csrf(csrf -> csrf.disable())
-                .sessionManagement(sm -> sm.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(
                                 "/api/v1/users/login",
@@ -69,9 +68,9 @@ public class Users_Config {
         config.setAllowedHeaders(List.of("*"));
         config.setAllowCredentials(true);
 
-        UrlBasedCorsConfigurationSource src = new UrlBasedCorsConfigurationSource();
-        src.registerCorsConfiguration("/**", config);
-        return src;
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", config);
+        return source;
     }
 
     @Bean
