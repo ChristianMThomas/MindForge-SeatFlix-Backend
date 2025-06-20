@@ -84,7 +84,6 @@ public class Users_Controller {
         Users user = user_Service.findUserByUsername(loginRequest.getUsername());
 
         if (user != null && passwordEncoder.matches(loginRequest.getPassword(), user.getPassword())) {
-
             // Wrap user in Spring Security-compatible class
             CustomUserDetails userDetails = new CustomUserDetails(user);
 
@@ -95,10 +94,11 @@ public class Users_Controller {
                     userDetails.getAuthorities());
 
             // Set authentication in Spring Security context
-            SecurityContext securityContext = SecurityContextHolder.getContext();
+            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
             securityContext.setAuthentication(authenticationToken);
+            SecurityContextHolder.setContext(securityContext);
 
-            // Persist the security context in session
+            // Persist security context into HTTP session
             request.getSession(true).setAttribute(
                     HttpSessionSecurityContextRepository.SPRING_SECURITY_CONTEXT_KEY,
                     securityContext);
@@ -109,7 +109,6 @@ public class Users_Controller {
             response.put("userId", user.getId());
 
             return ResponseEntity.ok(response);
-
         } else {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("Invalid credentials");
         }
