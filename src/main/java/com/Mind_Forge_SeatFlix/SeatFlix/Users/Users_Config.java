@@ -20,6 +20,9 @@ import org.springframework.session.web.http.DefaultCookieSerializer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.web.multipart.support.MultipartFilter;
 import org.springframework.security.web.context.AbstractSecurityWebApplicationInitializer;
+import org.springframework.security.web.context.HttpSessionSecurityContextRepository;
+import org.springframework.security.web.context.SecurityContextRepository;
+
 import jakarta.servlet.ServletContext;
 
 import java.util.List;
@@ -48,19 +51,6 @@ public class Users_Config {
                 .build();
     }
 
-    @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
-        configuration.setAllowedMethods(List.of("*"));
-        configuration.setAllowedHeaders(List.of("*"));
-        configuration.setAllowCredentials(true);
-
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
     public class SecurityApplicationInitializer
             extends AbstractSecurityWebApplicationInitializer {
 
@@ -87,6 +77,24 @@ public class Users_Config {
                             .anyRequest().authenticated());
 
             return http.build();
+        }
+
+        @Bean
+        public SecurityContextRepository securityContextRepository() {
+            return new HttpSessionSecurityContextRepository(); // ✅ registers default Spring session store
+        }
+
+        @Bean
+        public CorsConfigurationSource corsConfigurationSource() {
+            CorsConfiguration configuration = new CorsConfiguration();
+            configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
+            configuration.setAllowedMethods(List.of("*"));
+            configuration.setAllowedHeaders(List.of("*"));
+            configuration.setAllowCredentials(true);
+
+            UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+            source.registerCorsConfiguration("/**", configuration);
+            return source;
         }
 
         @Bean
