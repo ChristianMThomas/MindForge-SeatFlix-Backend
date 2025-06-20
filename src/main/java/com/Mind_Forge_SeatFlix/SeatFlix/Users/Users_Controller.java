@@ -119,8 +119,11 @@ public class Users_Controller {
             @AuthenticationPrincipal CustomUserDetails userDetails) {
 
         if (userDetails == null) {
-            System.out.println("UserDetails is null — session may not be attached.");
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("User not authenticated");
+        }
+
+        if (file.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("No file uploaded");
         }
 
         try {
