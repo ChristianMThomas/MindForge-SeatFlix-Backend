@@ -93,10 +93,10 @@ public class Users_Controller {
                     null,
                     userDetails.getAuthorities());
 
+            
             // Set authentication in Spring Security context
-            SecurityContext securityContext = SecurityContextHolder.createEmptyContext();
+            SecurityContext securityContext = SecurityContextHolder.getContext();
             securityContext.setAuthentication(authenticationToken);
-            SecurityContextHolder.setContext(securityContext);
 
             // Persist security context into HTTP session
             request.getSession(true).setAttribute(

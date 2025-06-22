@@ -1,5 +1,6 @@
 package com.Mind_Forge_SeatFlix.SeatFlix.Users;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -24,54 +25,53 @@ import java.util.List;
 @EnableWebSecurity
 public class Users_Config {
 
+    @Autowired
+    private UserDetailsServiceImpl userDetailsService;
+
     @Bean
-    public BCryptPasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder();
+    BCryptPasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(); // Shared instance for the whole app
     }
 
     @Bean
-    public AuthenticationManager authenticationManager(HttpSecurity http,
-            UserDetailsServiceImpl uds,
-            BCryptPasswordEncoder encoder) throws Exception {
+    public AuthenticationManager authenticationManager(HttpSecurity http) throws Exception {
         return http.getSharedObject(AuthenticationManagerBuilder.class)
-                .userDetailsService(uds)
-                .passwordEncoder(encoder)
+                .userDetailsService(userDetailsService)
+                .passwordEncoder(new BCryptPasswordEncoder())
                 .and()
                 .build();
     }
 
     @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http, CorsConfigurationSource corsSource)
-            throws Exception {
-        http
-                .cors(cors -> cors.configurationSource(corsSource))
-                .csrf(csrf -> csrf.disable())
-                .authorizeHttpRequests(auth -> auth
-                        .requestMatchers(
-                                "/api/v1/users/login",
-                                "/api/v1/users/register",
-                                "/error",
-                                "/uploads/**")
-                        .permitAll()
-                        .requestMatchers(HttpMethod.GET, "/api/v1/users/**").authenticated()
-                        .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
-                        .anyRequest().authenticated());
+    public CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        configuration.setAllowedHeaders(List.of("Content-Type", "Authorization"));
+        configuration.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
+        configuration.setAllowCredentials(true);
 
-        return http.build();
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/api/v1/users/**", configuration);
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 
     @Bean
-    public CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration config = new CorsConfiguration();
-        config.setAllowedOrigins(List.of("https://mind-forge-cthomas.com"));
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        config.setAllowedHeaders(List.of("*"));
-        config.setAllowCredentials(true);
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .cors(cors -> cors.configurationSource(corsConfigurationSource()))
+        .csrf(csrf -> csrf.disable())
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/api/v1/users/login", "/api/v1/users/register").permitAll()
+            .requestMatchers(HttpMethod.GET, "/api/v1/users/**").permitAll()
+            .requestMatchers(HttpMethod.POST, "/api/v1/users/upload-avatar").authenticated()
+            .anyRequest().authenticated()
+        );
+    return http.build();
+}
 
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", config);
-        return source;
-    }
+
 
     @Bean
     public CookieSerializer cookieSerializer() {
@@ -86,3 +86,4 @@ public class Users_Config {
     }
 
 }
+
