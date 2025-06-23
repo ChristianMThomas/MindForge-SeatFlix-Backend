@@ -52,7 +52,6 @@ public class Users_Config {
         configuration.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/api/v1/users/**", configuration);
         source.registerCorsConfiguration("/**", configuration);
         return source;
     }
